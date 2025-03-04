@@ -9,7 +9,10 @@ on:
 jobs:
   comment:
     runs-on: ubuntu-latest  
-    
+
+    permissions:
+      pull-requests: write
+
     steps:
       - name: Comment on PR
         uses: thollander/actions-comment-pull-request@v2
