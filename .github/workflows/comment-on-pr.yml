@@ -14,8 +14,65 @@ jobs:
       pull-requests: write
 
     steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Determine Labels
+        id: labels
+        uses: actions-ecosystem/action-get-labels@v1
+
+      - name: Set Checklist Message
+        id: set-message
+        run: |
+          general_checklist="## PR Checklist :white_check_mark:
+
+- [ ] New files have been placed in appropriate folders
+- [ ] Functions have been modularized as much as possible
+- [ ] Linter runs with no warnings/errors
+- [ ] Avoids unused imports, variables, or functions
+- [ ] No console.logs or commented out code
+"
+
+          frontend_checklist="### Frontend
+- [ ] Follows Figma completely
+- [ ] Page is responsive for mobile
+- [ ] Components have been made where appropriate
+- [ ] No hardcoded colors/sizes- uses tailwind config
+- [ ] Uses flex gaps and paddings instead of margins wherever possible
+- [ ] Uses appropriate hooks only when necessary
+- [ ] Uses relative positioning instead of absolute where appropriate
+- [ ] Handles error responses from API calls to backend
+"
+
+          backend_checklist="### Backend
+- [ ] API endpoints work as intended
+- [ ] Uses async/await instead of promises
+- [ ] Uses try/catch blocks for error handling
+- [ ] Uses status codes correctly
+- [ ] Schemas and queries are easily extensible
+- [ ] Operations are optimized to avoid unnecessary computations
+- [ ] Input is appropriately validated
+- [ ] Schemas are strict
+- [ ] Handles edge cases where necessary
+- [ ] Clear separation of actual database functionalities and API endpoints
+"
+
+          final_message="$general_checklist"
+
+          if echo "${{ steps.labels.outputs.labels }}" | grep -Eiq "frontend|front-end|ft-end|fe|fr-end"; then
+            final_message="$final_message\n$frontend_checklist"
+          fi
+          
+          if echo "${{ steps.labels.outputs.labels }}" | grep -Eiq "backend|back-end|bc-end|be"; then
+            final_message="$final_message\n$backend_checklist"
+          fi
+
+          echo "message<<EOF" >> $GITHUB_ENV
+          echo "$final_message" >> $GITHUB_ENV
+          echo "EOF" >> $GITHUB_ENV
+
       - name: Comment on PR
         uses: thollander/actions-comment-pull-request@v2
         with:
-          message: "comment"
+          message: ${{ env.message }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
