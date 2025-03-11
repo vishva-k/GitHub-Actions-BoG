@@ -24,7 +24,8 @@ jobs:
       - name: Set Checklist Message
         id: set-message
         run: |
-          general_checklist=$(cat <<EOF
+          # Define General checklist
+          general_checklist=$(cat <<'EOF'
 ## PR Checklist :white_check_mark:
 
 ### General
@@ -36,12 +37,12 @@ jobs:
 EOF
 )
 
-    frontend_checklist=$(cat <<EOF
+          frontend_checklist=$(cat <<'EOF'
 ### Frontend
 - [ ] Follows Figma completely
 - [ ] Page is responsive for mobile
 - [ ] Components have been made where appropriate
-- [ ] No hardcoded colors/sizes- uses tailwind config
+- [ ] No hardcoded colors/sizes - uses tailwind config
 - [ ] Uses flex gaps and paddings instead of margins wherever possible
 - [ ] Uses appropriate hooks only when necessary
 - [ ] Uses relative positioning instead of absolute where appropriate
@@ -49,7 +50,7 @@ EOF
 EOF
 )
 
-    backend_checklist=$(cat <<EOF
+          backend_checklist=$(cat <<'EOF'
 ### Backend
 - [ ] API endpoints work as intended
 - [ ] Uses async/await instead of promises
@@ -64,19 +65,19 @@ EOF
 EOF
 )
 
-    final_message="$general_checklist"
+          final_message="$general_checklist"
 
-    if echo "${{ steps.labels.outputs.labels }}" | grep -Eiq "frontend|front-end|ft-end|fe|fr-end"; then
-      final_message="$final_message"$'\n'"$frontend_checklist"
-    fi
+          if echo "${{ steps.labels.outputs.labels }}" | grep -Eiq "frontend|front-end|ft-end|fe|fr-end"; then
+            final_message="$final_message"$'\n\n'"$frontend_checklist"
+          fi
 
-    if echo "${{ steps.labels.outputs.labels }}" | grep -Eiq "backend|back-end|bc-end|be"; then
-      final_message="$final_message"$'\n'"$backend_checklist"
-    fi
+          if echo "${{ steps.labels.outputs.labels }}" | grep -Eiq "backend|back-end|bc-end|be"; then
+            final_message="$final_message"$'\n\n'"$backend_checklist"
+          fi
 
-    echo "message<<EOF" >> $GITHUB_ENV
-    echo "$final_message" >> $GITHUB_ENV
-    echo "EOF" >> $GITHUB_ENV
+          echo "message<<EOF" >> $GITHUB_ENV
+          echo "$final_message" >> $GITHUB_ENV
+          echo "EOF" >> $GITHUB_ENV
 
       - name: Comment on PR
         uses: thollander/actions-comment-pull-request@v2
