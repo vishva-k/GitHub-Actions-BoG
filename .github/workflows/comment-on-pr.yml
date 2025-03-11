@@ -24,16 +24,20 @@ jobs:
       - name: Set Checklist Message
         id: set-message
         run: |
-          general_checklist="## PR Checklist :white_check_mark:
+          general_checklist=$(cat <<EOF
+## PR Checklist :white_check_mark:
 
+### General
 - [ ] New files have been placed in appropriate folders
 - [ ] Functions have been modularized as much as possible
 - [ ] Linter runs with no warnings/errors
 - [ ] Avoids unused imports, variables, or functions
 - [ ] No console.logs or commented out code
-"
+EOF
+)
 
-          frontend_checklist="### Frontend
+    frontend_checklist=$(cat <<EOF
+### Frontend
 - [ ] Follows Figma completely
 - [ ] Page is responsive for mobile
 - [ ] Components have been made where appropriate
@@ -42,9 +46,11 @@ jobs:
 - [ ] Uses appropriate hooks only when necessary
 - [ ] Uses relative positioning instead of absolute where appropriate
 - [ ] Handles error responses from API calls to backend
-"
+EOF
+)
 
-          backend_checklist="### Backend
+    backend_checklist=$(cat <<EOF
+### Backend
 - [ ] API endpoints work as intended
 - [ ] Uses async/await instead of promises
 - [ ] Uses try/catch blocks for error handling
@@ -55,21 +61,22 @@ jobs:
 - [ ] Schemas are strict
 - [ ] Handles edge cases where necessary
 - [ ] Clear separation of actual database functionalities and API endpoints
-"
+EOF
+)
 
-          final_message="$general_checklist"
+    final_message="$general_checklist"
 
-          if echo "${{ steps.labels.outputs.labels }}" | grep -Eiq "frontend|front-end|ft-end|fe|fr-end"; then
-            final_message="$final_message\n$frontend_checklist"
-          fi
-          
-          if echo "${{ steps.labels.outputs.labels }}" | grep -Eiq "backend|back-end|bc-end|be"; then
-            final_message="$final_message\n$backend_checklist"
-          fi
+    if echo "${{ steps.labels.outputs.labels }}" | grep -Eiq "frontend|front-end|ft-end|fe|fr-end"; then
+      final_message="$final_message"$'\n'"$frontend_checklist"
+    fi
 
-          echo "message<<EOF" >> $GITHUB_ENV
-          echo "$final_message" >> $GITHUB_ENV
-          echo "EOF" >> $GITHUB_ENV
+    if echo "${{ steps.labels.outputs.labels }}" | grep -Eiq "backend|back-end|bc-end|be"; then
+      final_message="$final_message"$'\n'"$backend_checklist"
+    fi
+
+    echo "message<<EOF" >> $GITHUB_ENV
+    echo "$final_message" >> $GITHUB_ENV
+    echo "EOF" >> $GITHUB_ENV
 
       - name: Comment on PR
         uses: thollander/actions-comment-pull-request@v2
