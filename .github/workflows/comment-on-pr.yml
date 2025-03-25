@@ -16,10 +16,10 @@ jobs:
       - name: Determine comment type
         id: set-comment
         run: |
-          if [[ "$GITHUB_HEAD_REF" == *frontend* ]] || [[ "$GITHUB_HEAD_REF" == fe/* ]]; then
-            echo "message=🚀 Thanks for the frontend changes! Please ensure UI tests pass and components are responsive." >> $GITHUB_OUTPUT
-          elif [[ "$GITHUB_HEAD_REF" == *backend* ]] || [[ "$GITHUB_HEAD_REF" == be/* ]]; then
-            echo "message=🔧 Thanks for the backend changes! Remember to update API docs and check database migrations." >> $GITHUB_OUTPUT
+          if [[ "$GITHUB_HEAD_REF" == *frontend* ]] || [[ "$GITHUB_HEAD_REF" == fe/* ]] || [[ "$GITHUB_HEAD_REF" == *front-end* ]]; then
+            echo "message=🚀 Thanks for the frontend changes!" >> $GITHUB_OUTPUT
+          elif [[ "$GITHUB_HEAD_REF" == *backend* ]] || [[ "$GITHUB_HEAD_REF" == be/* ]] || [[ "$GITHUB_HEAD_REF" == *back-end* ]]; then
+            echo "message=🔧 Thanks for the backend changes!" >> $GITHUB_OUTPUT
           else
             echo "message=📌 Thank you for your contribution! Please ensure all checks pass before merging." >> $GITHUB_OUTPUT
           fi
