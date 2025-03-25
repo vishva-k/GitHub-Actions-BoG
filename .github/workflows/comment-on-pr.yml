@@ -25,56 +25,52 @@ jobs:
         id: set-message
         run: |
           # Define General checklist
-          general_checklist=$(cat <<'EOF'
-## PR Checklist :white_check_mark:
+          general_checklist="## PR Checklist :white_check_mark:
+          ## General
+          - [ ] New files have been placed in appropriate folders
+          - [ ] Functions have been modularized as much as possible
+          - [ ] Linter runs with no warnings/errors
+          - [ ] Avoids unused imports, variables, or functions
+          - [ ] No console.logs or commented out code"
 
-### General
-- [ ] New files have been placed in appropriate folders
-- [ ] Functions have been modularized as much as possible
-- [ ] Linter runs with no warnings/errors
-- [ ] Avoids unused imports, variables, or functions
-- [ ] No console.logs or commented out code
-EOF
-)
+          # Define Frontend checklist
+          frontend_checklist="## Frontend
+          - [ ] Follows Figma completely
+          - [ ] Page is responsive for mobile
+          - [ ] Components have been made where appropriate
+          - [ ] No hardcoded colors/sizes - uses tailwind config
+          - [ ] Uses flex gaps and paddings instead of margins wherever possible
+          - [ ] Uses appropriate hooks only when necessary
+          - [ ] Uses relative positioning instead of absolute where appropriate
+          - [ ] Handles error responses from API calls to backend"
 
-          frontend_checklist=$(cat <<'EOF'
-### Frontend
-- [ ] Follows Figma completely
-- [ ] Page is responsive for mobile
-- [ ] Components have been made where appropriate
-- [ ] No hardcoded colors/sizes - uses tailwind config
-- [ ] Uses flex gaps and paddings instead of margins wherever possible
-- [ ] Uses appropriate hooks only when necessary
-- [ ] Uses relative positioning instead of absolute where appropriate
-- [ ] Handles error responses from API calls to backend
-EOF
-)
+          # Define Backend checklist
+          backend_checklist="### Backend
+          - [ ] API endpoints work as intended
+          - [ ] Uses async/await instead of promises
+          - [ ] Uses try/catch blocks for error handling
+          - [ ] Uses status codes correctly
+          - [ ] Schemas and queries are easily extensible
+          - [ ] Operations are optimized to avoid unnecessary computations
+          - [ ] Input is appropriately validated
+          - [ ] Schemas are strict
+          - [ ] Handles edge cases where necessary
+          - [ ] Clear separation of actual database functionalities and API endpoints"
 
-          backend_checklist=$(cat <<'EOF'
-### Backend
-- [ ] API endpoints work as intended
-- [ ] Uses async/await instead of promises
-- [ ] Uses try/catch blocks for error handling
-- [ ] Uses status codes correctly
-- [ ] Schemas and queries are easily extensible
-- [ ] Operations are optimized to avoid unnecessary computations
-- [ ] Input is appropriately validated
-- [ ] Schemas are strict
-- [ ] Handles edge cases where necessary
-- [ ] Clear separation of actual database functionalities and API endpoints
-EOF
-)
-
+          # Initialize final message with the general checklist
           final_message="$general_checklist"
 
+          # Append Frontend checklist if the label matches
           if echo "${{ steps.labels.outputs.labels }}" | grep -Eiq "frontend|front-end|ft-end|fe|fr-end"; then
             final_message="$final_message"$'\n\n'"$frontend_checklist"
           fi
 
+          # Append Backend checklist if the label matches
           if echo "${{ steps.labels.outputs.labels }}" | grep -Eiq "backend|back-end|bc-end|be"; then
             final_message="$final_message"$'\n\n'"$backend_checklist"
           fi
 
+          # Save the final message to environment variable
           echo "message<<EOF" >> $GITHUB_ENV
           echo "$final_message" >> $GITHUB_ENV
           echo "EOF" >> $GITHUB_ENV
