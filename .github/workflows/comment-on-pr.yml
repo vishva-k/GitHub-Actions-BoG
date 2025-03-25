@@ -19,7 +19,7 @@ jobs:
 
       - name: Determine Labels
         id: labels
-        uses: actions-ecosystem/action-get-labels@v1
+        uses: octokit/request-action@v2
 
       - name: Set Checklist Message
         id: set-message
