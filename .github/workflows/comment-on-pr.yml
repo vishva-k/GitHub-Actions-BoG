@@ -8,11 +8,24 @@ on:
 
 jobs:
   comment:
-    runs-on: ubuntu-latest  
-    
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: write
+
     steps:
+      - name: Determine comment type
+        id: set-comment
+        run: |
+          if [[ "$GITHUB_HEAD_REF" == *frontend* ]] || [[ "$GITHUB_HEAD_REF" == fe/* ]] || [[ "$GITHUB_HEAD_REF" == *front-end* ]]; then
+            echo "message=🚀 Thanks for the frontend changes!" >> $GITHUB_OUTPUT
+          elif [[ "$GITHUB_HEAD_REF" == *backend* ]] || [[ "$GITHUB_HEAD_REF" == be/* ]] || [[ "$GITHUB_HEAD_REF" == *back-end* ]]; then
+            echo "message=🔧 Thanks for the backend changes!" >> $GITHUB_OUTPUT
+          else
+            echo "message=📌 Thank you for your contribution! Please ensure all checks pass before merging." >> $GITHUB_OUTPUT
+          fi
+
       - name: Comment on PR
         uses: thollander/actions-comment-pull-request@v2
         with:
-          message: "comment"
+          message: ${{ steps.set-comment.outputs.message }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
