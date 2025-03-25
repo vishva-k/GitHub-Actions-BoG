@@ -8,75 +8,24 @@ on:
 
 jobs:
   comment:
-    runs-on: ubuntu-latest  
-
+    runs-on: ubuntu-latest
     permissions:
       pull-requests: write
 
     steps:
-      - name: Checkout
-        uses: actions/checkout@v3
-
-      - name: Determine Labels
-        id: labels
-        uses: octokit/request-action@v1
-
-      - name: Set Checklist Message
-        id: set-message
+      - name: Determine comment type
+        id: set-comment
         run: |
-          # Define General checklist
-          general_checklist="## PR Checklist :white_check_mark:
-          ## General
-          - [ ] New files have been placed in appropriate folders
-          - [ ] Functions have been modularized as much as possible
-          - [ ] Linter runs with no warnings/errors
-          - [ ] Avoids unused imports, variables, or functions
-          - [ ] No console.logs or commented out code"
-
-          # Define Frontend checklist
-          frontend_checklist="## Frontend
-          - [ ] Follows Figma completely
-          - [ ] Page is responsive for mobile
-          - [ ] Components have been made where appropriate
-          - [ ] No hardcoded colors/sizes - uses tailwind config
-          - [ ] Uses flex gaps and paddings instead of margins wherever possible
-          - [ ] Uses appropriate hooks only when necessary
-          - [ ] Uses relative positioning instead of absolute where appropriate
-          - [ ] Handles error responses from API calls to backend"
-
-          # Define Backend checklist
-          backend_checklist="### Backend
-          - [ ] API endpoints work as intended
-          - [ ] Uses async/await instead of promises
-          - [ ] Uses try/catch blocks for error handling
-          - [ ] Uses status codes correctly
-          - [ ] Schemas and queries are easily extensible
-          - [ ] Operations are optimized to avoid unnecessary computations
-          - [ ] Input is appropriately validated
-          - [ ] Schemas are strict
-          - [ ] Handles edge cases where necessary
-          - [ ] Clear separation of actual database functionalities and API endpoints"
-
-          # Initialize final message with the general checklist
-          final_message="$general_checklist"
-
-          # Append Frontend checklist if the label matches
-          if echo "${{ steps.labels.outputs.labels }}" | grep -Eiq "frontend|front-end|ft-end|fe|fr-end"; then
-            final_message="$final_message"$'\n\n'"$frontend_checklist"
+          if [[ "$GITHUB_HEAD_REF" == *frontend* ]] || [[ "$GITHUB_HEAD_REF" == fe/* ]]; then
+            echo "message=🚀 Thanks for the frontend changes! Please ensure UI tests pass and components are responsive." >> $GITHUB_OUTPUT
+          elif [[ "$GITHUB_HEAD_REF" == *backend* ]] || [[ "$GITHUB_HEAD_REF" == be/* ]]; then
+            echo "message=🔧 Thanks for the backend changes! Remember to update API docs and check database migrations." >> $GITHUB_OUTPUT
+          else
+            echo "message=📌 Thank you for your contribution! Please ensure all checks pass before merging." >> $GITHUB_OUTPUT
           fi
-
-          # Append Backend checklist if the label matches
-          if echo "${{ steps.labels.outputs.labels }}" | grep -Eiq "backend|back-end|bc-end|be"; then
-            final_message="$final_message"$'\n\n'"$backend_checklist"
-          fi
-
-          # Save the final message to environment variable
-          echo "message<<EOF" >> $GITHUB_ENV
-          echo "$final_message" >> $GITHUB_ENV
-          echo "EOF" >> $GITHUB_ENV
 
       - name: Comment on PR
         uses: thollander/actions-comment-pull-request@v2
         with:
-          message: ${{ env.message }}
+          message: ${{ steps.set-comment.outputs.message }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
